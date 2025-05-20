@@ -1,0 +1,63 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Sözcü Haber Arşivi";
+}
+
+<div class="text-center">
+    <h1 class="display-4">@ViewData["Title"]</h1>
+    <p>Elasticsearch'te indekslenen son haberler.</p>
+</div>
+
+@* === ARAMA FORMU === *@
+<form method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="SearchTerm" class="form-control" placeholder="Haberlerde ara..." value="@Model.SearchTerm" />
+        <button type="submit" class="btn btn-primary">Ara</button>
+    </div>
+</form>
+@* ===================== *@
+
+<hr />
+
+@if (Model.Articles != null && Model.Articles.Any())
+{
+    <div class="row">
+        @foreach (var article in Model.Articles)
+        {
+            <div class="col-md-12 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="@article.Url" target="_blank">@article.Title</a>
+                        </h5>
+                        <p class="card-text">
+                            @if (!string.IsNullOrEmpty(article.Content) && article.Content != "Content not found or not fetched.")
+                            {
+                                // İçeriğin ilk 250 karakterini göster, eğer daha uzunsa "..." ekle
+                                <span>@(article.Content.Length > 250 ? article.Content.Substring(0, 250) + "..." : article.Content)</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">İçerik bulunamadı.</span>
+                            }
+                        </p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Kaynak: @article.Source - Kazıma Tarihi: @article.ScrapedDateUtc.ToString("dd MMMM yyyy HH:mm")
+                            </small>
+                        </p>
+                        <a href="@article.Url" target="_blank" class="btn btn-sm btn-outline-primary">Habere Git</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        Gösterilecek haber bulunamadı veya Elasticsearch'ten veri çekilemedi.
+        Lütfen Elasticsearch sunucunuzun çalıştığından ve 'sozcu_articles' indeksinde veri olduğundan emin olun.
+    </div>
+}
