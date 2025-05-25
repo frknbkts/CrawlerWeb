@@ -4,7 +4,7 @@ namespace ScraperWeb.Models
 {
     public class Article
     {
-        [JsonPropertyName("title")] // Elasticsearch'teki alan adıyla eşleşmesi için
+        [JsonPropertyName("title")]
         public string? Title { get; set; }
 
         [JsonPropertyName("url")]
@@ -17,9 +17,9 @@ namespace ScraperWeb.Models
         public string? Source { get; set; }
 
         [JsonPropertyName("scraped_date_utc")]
-        public DateTime ScrapedDateUtc { get; set; } // Tarih tipinde alabiliriz
+        public DateTime ScrapedDateUtc { get; set; }
 
         [JsonPropertyName("indexed_at_utc")]
-        public DateTime IndexedAtUtc { get; set; } // Tarih tipinde alabiliriz
+        public DateTime IndexedAtUtc { get; set; }
     }
 }

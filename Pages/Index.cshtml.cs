@@ -1,10 +1,9 @@
-// Pages/Index.cshtml.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Nest;
 using ScraperWeb.Models;
 using System.Collections.Generic;
-using System.Linq; // ToList() için
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ScraperWeb.Pages
@@ -18,7 +17,7 @@ namespace ScraperWeb.Pages
 
         // Arama terimini URL'den almak için BindProperty attribute'u
         [BindProperty(SupportsGet = true)]
-        public string? SearchTerm { get; set; } // Kullanýcýnýn girdiði arama terimi
+        public string? SearchTerm { get; set; }
 
         public IndexModel(ILogger<IndexModel> logger, IElasticClient elasticClient)
         {
@@ -36,32 +35,27 @@ namespace ScraperWeb.Pages
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-                // Eðer arama terimi varsa, baþlýk (title) ve içerik (content) alanlarýnda ara
-                // Python scriptinizde Türkçe analizör kullandýðýnýz için Elasticsearch bu alanlarda
-                // Türkçe arama yaparken daha iyi sonuçlar verecektir.
                 searchResponse = await _elasticClient.SearchAsync<Article>(s => s
                     .Index(esDefaultIndex)
                     .Query(q => q
                         .MultiMatch(mm => mm
-                            .Query(SearchTerm) // Aranacak metin
+                            .Query(SearchTerm)
                             .Fields(f => f // Hangi alanlarda aranacaðý
-                                .Field(ff => ff.Title, boost: 2) // Baþlýk eþleþmelerine daha fazla aðýrlýk ver
+                                .Field(ff => ff.Title, boost: 2) // baslik eslesmeleri daha oncelikli
                                 .Field(ff => ff.Content)
                             )
-                            .Fuzziness(Fuzziness.Auto) // Yazým hatalarýna karþý tolerans (örn: ekonom -> ekonomi)
-                            .Operator(Operator.Or) // Kelimelerden herhangi biri eþleþirse (Or vs And)
+                            .Fuzziness(Fuzziness.Auto) // yazim hatasi tolernas
+                            .Operator(Operator.Or) // 2 kelimeli aramalarda bir kelime eþleþmesi yeterli
                         )
                     )
-                    .Size(20) // En fazla 20 sonuç getir
-                              // Arama yapýldýðýnda varsayýlan olarak alaka düzeyine (_score) göre sýralanýr.
-                              // Ýsterseniz ek sýralama kriterleri ekleyebilirsiniz:
-                              // .Sort(ss => ss.Descending("_score").ThenBy(s => s.Descending("scraped_date_utc")))
+                    .Size(20) // aramalar _scorelere göre siralanicak
+
                 );
                 _logger.LogInformation("'{SearchTerm}' için arama yapýldý.", SearchTerm);
             }
             else
             {
-                // Arama terimi yoksa, en son eklenen haberleri listele (mevcut mantýk)
+                // Arama terimi yoksa, en son eklenen haberleri listele
                 searchResponse = await _elasticClient.SearchAsync<Article>(s => s
                     .Index(esDefaultIndex)
                     .Query(q => q.MatchAll())
