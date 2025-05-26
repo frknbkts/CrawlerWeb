@@ -41,21 +41,21 @@ namespace ScraperWeb.Pages
                         .MultiMatch(mm => mm
                             .Query(SearchTerm)
                             .Fields(f => f // Hangi alanlarda aranacaðý
-                                .Field(ff => ff.Title, boost: 2) // baslik eslesmeleri daha oncelikli
+                                 // .Field(ff => ff.Title, boost: 2) // baslik eslesmeleri daha oncelikli
                                 .Field(ff => ff.Content)
                             )
                             .Fuzziness(Fuzziness.Auto) // yazim hatasi tolernas
                             .Operator(Operator.Or) // 2 kelimeli aramalarda bir kelime eþleþmesi yeterli
                         )
                     )
-                    .Size(20) // aramalar _scorelere göre siralanicak
+                    .Size(20)
 
                 );
                 _logger.LogInformation("'{SearchTerm}' için arama yapýldý.", SearchTerm);
             }
             else
             {
-                // Arama terimi yoksa, en son eklenen haberleri listele
+
                 searchResponse = await _elasticClient.SearchAsync<Article>(s => s
                     .Index(esDefaultIndex)
                     .Query(q => q.MatchAll())
